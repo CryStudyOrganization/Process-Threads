@@ -1,0 +1,70 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-a9742593a2cf498ca747.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "DataTimSort",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "DataTimSort::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-DataTimSort-Debug-2bf5a2b7f94fc7e0ffab.json",
+					"name" : "DataTimSort",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "DataTimSort_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-DataTimSort_autogen-Debug-bd06b6d8f7a79a251684.json",
+					"name" : "DataTimSort_autogen",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataTimSort-Desktop_Qt_6_5_1_MinGW_64_bit-Debug",
+		"source" : "D:/Projects/Labs/System&NetworkProgramming/lab1/DataTimSort"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

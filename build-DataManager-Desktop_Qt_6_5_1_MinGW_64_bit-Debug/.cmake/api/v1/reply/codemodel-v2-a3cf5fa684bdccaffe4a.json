@@ -1,0 +1,70 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-1bac46aac4f7fed3a7be.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "DataManager",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "DataManager::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-DataManager-Debug-6038421a074e2f04d615.json",
+					"name" : "DataManager",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "DataManager_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-DataManager_autogen-Debug-91b71ee8fcc9b8a06ad5.json",
+					"name" : "DataManager_autogen",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug",
+		"source" : "D:/Projects/Labs/System&NetworkProgramming/lab1/DataManager"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

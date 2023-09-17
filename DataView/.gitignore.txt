@@ -1,0 +1,6 @@
+# Игнорировать файлы сборки Qt Widget
+Makefile
+CMakeLists.txt
+CMakeFiles/
+*.cmake
+CMakeCache.txt
