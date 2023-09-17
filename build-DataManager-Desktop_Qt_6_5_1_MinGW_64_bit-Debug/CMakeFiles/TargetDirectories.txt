@@ -1,8 +1,0 @@
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/DataManager.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/list_install_components.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install/local.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/install/strip.dir
-D:/Projects/Labs/System&NetworkProgramming/lab1/build-DataManager-Desktop_Qt_6_5_1_MinGW_64_bit-Debug/CMakeFiles/DataManager_autogen.dir
