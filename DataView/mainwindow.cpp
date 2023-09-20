@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <QCoreApplication>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -8,44 +8,81 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Создание таймера
+    Initilize();
+
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateData);
-    timer->start(500); // Таймер срабатывает каждые 500 миллисекунд
+    timer->start(500);
+
+}
+
+void MainWindow::Initilize(){
+    dataFileMutex = new QMutex;
+    connect(findChild<QPushButton*>("selectedPathButton"), &QPushButton::clicked, this, &MainWindow::choosePath);
 }
 
 void MainWindow::updateData()
 {
-    // Формирование пути к файлу с данными
-    const QString dataFilePath = "../datafiles/data.dat";
-
-    // Проектирование файла в память
-    QFile file(dataFilePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        ui->textBrowser->setPlainText("Ошибка открытия файла!");
+    if (!QFile::exists(dataPath)) {
+        ui->textBrowser->setPlainText(dataPath);
         return;
     }
 
-    QTextStream stream(&file);
-    QStringList dataList;
+    QFile file(dataPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        ui->textBrowser->setPlainText("Помилка відкриття файлу!");
+        return;
+    }
 
-    // Чтение данных из файла и формирование списка
+    QStringList dataList;
+    if (readDataFromFile(file, dataList)) {
+        displayData(dataList);
+    }
+
+    file.close(); // Обязательное закрытие файла
+}
+
+bool MainWindow::readDataFromFile(QFile& file, QStringList& dataList)
+{
+    // Используем мьютекс для синхронизации доступа к файлу
+    dataFileMutex->lock();
+
+    QTextStream stream(&file);
+
     while (!stream.atEnd()) {
         QString line;
         stream >> line;
         dataList.append(line);
     }
 
+    // Разблокируем мьютекс после завершения операций с файлом
+    dataFileMutex->unlock();
+
+    return !dataList.isEmpty();
+}
+
+void MainWindow::displayData(const QStringList& dataList)
+{
     if (dataList.isEmpty()) {
-        // Если список данных пустой, то выводим сообщение об этом
-        ui->textBrowser->setPlainText("Файл пуст.");
+        ui->textBrowser->setPlainText("Файл пустий.");
     } else {
-        // Иначе выводим данные из файла
         ui->textBrowser->setPlainText(dataList.join(" "));
+    }
+}
+
+void MainWindow::choosePath()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл", QDir::homePath());
+
+    if (!filePath.isEmpty()) {
+        dataPath = filePath;
+        ui->currPath->setText(filePath);
+        ui->textBrowser->setPlainText("Выбранный путь: " + filePath);
     }
 }
 
 MainWindow::~MainWindow()
 {
+    delete dataFileMutex;
     delete ui;
 }

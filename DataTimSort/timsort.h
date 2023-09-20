@@ -1,8 +1,6 @@
-#ifndef TIMSORT_H
-#define TIMSORT_H
-
 #include <algorithm>
 #include <vector>
+#include <thread>
 
 template <typename RandomAccessIterator>
 void insertionSort(RandomAccessIterator begin, RandomAccessIterator end) {
@@ -39,7 +37,7 @@ void merge(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccess
 
 template <typename RandomAccessIterator>
 void timsort(RandomAccessIterator begin, RandomAccessIterator end) {
-    const int minRun = 32; // Минимальный размер подмассива для сортировки вставками
+    const int minRun = 32;
 
     auto size = std::distance(begin, end);
 
@@ -48,16 +46,24 @@ void timsort(RandomAccessIterator begin, RandomAccessIterator end) {
         insertionSort(i, runEnd);
     }
 
-    for (auto size = minRun; size < std::distance(begin, end); size *= 2) {
+    std::vector<std::thread> threads;
+
+    auto contSize = std::distance(begin, end);
+
+    for (auto size = minRun; size < contSize; size *= 2) {
         for (auto i = begin; i < end; i += 2 * size) {
             auto middle = i + size;
             auto endRun = std::min(i + 2 * size, end);
 
             if (middle < endRun) {
-                merge(i, middle, endRun);
+                threads.emplace_back(merge<RandomAccessIterator>, i, middle, endRun);
             }
         }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
+        threads.clear();
     }
 }
-
-#endif // TIMSORT_H

@@ -2,9 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTimer>
-#include <QFile>
-#include <QIODevice>
+#include <QMutex>
+#include <QPushButton>
+#include <QTextBrowser>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,11 +15,29 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
+
+private Q_SLOTS:
+    void choosePath();
+
+private:
+    QString dataPath;
+    Ui::MainWindow *ui;
+    QPushButton *selectPathButton;
+    QTextBrowser *textBrowser;
+    QTextBrowser *currPath;
+    QMutex *dataFileMutex;
 
     void updateData();
-private:
-    Ui::MainWindow *ui;
+    bool readDataFromFile(QFile& file, QStringList& dataList);
+    void displayData(const QStringList& dataList);
+
+    Q_DISABLE_COPY(MainWindow);
+    Q_DISABLE_MOVE(MainWindow);
+
+    void Initilize();
+
 };
+
 #endif // MAINWINDOW_H

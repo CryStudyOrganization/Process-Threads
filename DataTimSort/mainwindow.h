@@ -7,6 +7,17 @@
 #include <QString>
 #include <QCheckBox>
 #include <QRandomGenerator>
+#include <QMutex>
+#include <QTextBrowser>
+#include <QFile>
+#include <QTextStream>
+#include <QMutexLocker>
+#include <QFileDialog>
+#include <QDir>
+
+class QCheckBox;
+class QPushButton;
+class QTextBrowser;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,25 +27,31 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public slots:
+public Q_SLOTS:
     void createData();
     void deleteData();
     void clearData();
     void shuffleData();
     void sortData();
     void saveDataToFile();
+    void updateTextBrowser();
+    void loadDataFromFile();
+
+private Q_SLOTS:
+    void choosePath();
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void updateTextBrowser();
-
 private:
-    const QString dataPath = "../datafiles/data.dat";
+    QString dataPath;
     QVector<int> dataVector;
 
     QCheckBox *isFile;
+
+    QPushButton *selectPathButton;
+    QTextBrowser *currPath;
 
     QPushButton *createButton;
     QPushButton *deleteButton;
@@ -43,5 +60,12 @@ private:
     QPushButton *sortButton;
 
     Ui::MainWindow *ui;
+    QMutex *fileMutex;
+
+    Q_DISABLE_COPY(MainWindow);
+    Q_DISABLE_MOVE(MainWindow);
+
+    void Initilize();
 };
+
 #endif // MAINWINDOW_H
