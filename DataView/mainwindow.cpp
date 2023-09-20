@@ -1,88 +1,108 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <QVBoxLayout>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+#include <QFile>
+#include <QSharedMemory>
+#include <QDataStream>
+#include <QTimer>
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     Initilize();
 
+    // Створюємо або відкриваємо memory-mapped файл
+    sharedMemory = new QSharedMemory("datafile", this);
+
+    connect(&fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::fileChanged);
+    fileWatcher.addPath(dataPath);
+
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateData);
     timer->start(500);
-
 }
 
-void MainWindow::Initilize(){
-    dataFileMutex = new QMutex;
+void MainWindow::Initilize()
+{
     connect(findChild<QPushButton*>("selectedPathButton"), &QPushButton::clicked, this, &MainWindow::choosePath);
+}
+
+void MainWindow::fileChanged(const QString& path)
+{
+    if (path == dataPath) {
+        saveDataToMemoryMappedFile();
+    }
 }
 
 void MainWindow::updateData()
 {
-    if (!QFile::exists(dataPath)) {
-        ui->textBrowser->setPlainText(dataPath);
-        return;
-    }
+    if (!dataPath.isEmpty()) {
+        if (sharedMemory->attach()) {
+            QByteArray byteArray;
 
-    QFile file(dataPath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        ui->textBrowser->setPlainText("Помилка відкриття файлу!");
-        return;
-    }
+            qint64 size = sharedMemory->size();
 
-    QStringList dataList;
-    if (readDataFromFile(file, dataList)) {
-        displayData(dataList);
-    }
+            if (sharedMemory->lock()) {
+                byteArray.resize(static_cast<int>(size));
+                memcpy(byteArray.data(), sharedMemory->data(), static_cast<size_t>(size));
+                sharedMemory->unlock();
+            }
 
-    file.close(); // Обязательное закрытие файла
-}
-
-bool MainWindow::readDataFromFile(QFile& file, QStringList& dataList)
-{
-    // Используем мьютекс для синхронизации доступа к файлу
-    dataFileMutex->lock();
-
-    QTextStream stream(&file);
-
-    while (!stream.atEnd()) {
-        QString line;
-        stream >> line;
-        dataList.append(line);
-    }
-
-    // Разблокируем мьютекс после завершения операций с файлом
-    dataFileMutex->unlock();
-
-    return !dataList.isEmpty();
-}
-
-void MainWindow::displayData(const QStringList& dataList)
-{
-    if (dataList.isEmpty()) {
-        ui->textBrowser->setPlainText("Файл пустий.");
+            if (size > 0) {
+                QString hexData = byteArray.toHex(' ').toUpper();
+                ui->textBrowser->setPlainText(hexData);
+            } else {
+                ui->textBrowser->setPlainText("No data in the memory-mapped file.");
+            }
+        }
     } else {
-        ui->textBrowser->setPlainText(dataList.join(" "));
+        ui->textBrowser->setPlainText("Select a file.");
     }
 }
+
 
 void MainWindow::choosePath()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл", QDir::homePath());
+    QString filePath = QFileDialog::getOpenFileName(this, "Виберіть файл", QDir::homePath());
 
     if (!filePath.isEmpty()) {
         dataPath = filePath;
         ui->currPath->setText(filePath);
-        ui->textBrowser->setPlainText("Выбранный путь: " + filePath);
+        ui->textBrowser->setPlainText("Вибраний шлях: " + filePath);
+        saveDataToMemoryMappedFile();
+    }
+}
+
+
+void MainWindow::saveDataToMemoryMappedFile()
+{
+    if (sharedMemory->isAttached()) {
+        sharedMemory->detach();
+    }
+
+    QFile file(dataPath);
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray byteArray = file.readAll();
+        file.close();
+
+        if (sharedMemory->create(byteArray.size())) {
+            if (sharedMemory->lock()) {
+                char *to = static_cast<char*>(sharedMemory->data());
+                const char *from = byteArray.constData();
+                int size = byteArray.size();
+                memcpy(to, from, size);
+                sharedMemory->unlock();
+            }
+        }
     }
 }
 
 MainWindow::~MainWindow()
 {
-    delete dataFileMutex;
+    if (sharedMemory->isAttached()) {
+        sharedMemory->detach();
+    }
+
     delete ui;
 }

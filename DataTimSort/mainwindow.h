@@ -33,12 +33,11 @@ public Q_SLOTS:
     void clearData();
     void shuffleData();
     void sortData();
-    void saveDataToFile();
     void updateTextBrowser();
-    void loadDataFromFile();
 
 private Q_SLOTS:
     void choosePath();
+    void saveDataToMemoryMappedFile();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -47,8 +46,6 @@ public:
 private:
     QString dataPath;
     QVector<int> dataVector;
-
-    QCheckBox *isFile;
 
     QPushButton *selectPathButton;
     QTextBrowser *currPath;
@@ -60,7 +57,8 @@ private:
     QPushButton *sortButton;
 
     Ui::MainWindow *ui;
-    QMutex *fileMutex;
+
+    std::unique_ptr<QMutex> mutex;
 
     Q_DISABLE_COPY(MainWindow);
     Q_DISABLE_MOVE(MainWindow);

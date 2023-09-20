@@ -5,6 +5,11 @@
 #include <QMutex>
 #include <QPushButton>
 #include <QTextBrowser>
+#include <QFile>
+#include <QFileDialog>
+#include <QTimer>
+#include <QSharedMemory>
+#include <QFileSystemWatcher>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,24 +25,28 @@ public:
 
 private Q_SLOTS:
     void choosePath();
+    void saveDataToMemoryMappedFile();
+    void fileChanged(const QString& path);
 
 private:
     QString dataPath;
     Ui::MainWindow *ui;
+
     QPushButton *selectPathButton;
     QTextBrowser *textBrowser;
     QTextBrowser *currPath;
-    QMutex *dataFileMutex;
 
+    QMutex *dataFileMutex;
+    QSharedMemory *sharedMemory;
+    QFileSystemWatcher fileWatcher;
+
+    void Initilize();
     void updateData();
     bool readDataFromFile(QFile& file, QStringList& dataList);
     void displayData(const QStringList& dataList);
 
     Q_DISABLE_COPY(MainWindow);
     Q_DISABLE_MOVE(MainWindow);
-
-    void Initilize();
-
 };
 
 #endif // MAINWINDOW_H
