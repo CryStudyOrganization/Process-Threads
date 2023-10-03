@@ -1,9 +1,12 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+#include <QFile>
+#include <QSharedMemory>
+#include <QDataStream>
+#include <QTimer>
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -37,6 +40,7 @@ void MainWindow::updateData()
             ui->textBrowser->setPlainText("Дані відсутні.");
         } else {
             ui->textBrowser->setPlainText(dataList.join(" "));
+
         }
     }
 }
