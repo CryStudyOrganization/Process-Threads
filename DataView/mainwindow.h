@@ -1,3 +1,4 @@
+// mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -5,6 +6,8 @@
 #include <QTimer>
 #include <QFile>
 #include <QIODevice>
+#include <QSharedMemory>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,8 +21,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
     void updateData();
+
 private:
     Ui::MainWindow *ui;
+
+    QSharedMemory sharedMemory; // Memory Mapped File
+    QMutex mutex; // М'ютекс для синхронізації доступу до даних
 };
+
 #endif // MAINWINDOW_H
