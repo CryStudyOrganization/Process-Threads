@@ -1,3 +1,4 @@
+// mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -8,16 +9,7 @@
 #include <QCheckBox>
 #include <QRandomGenerator>
 #include <QMutex>
-#include <QTextBrowser>
-#include <QFile>
-#include <QTextStream>
-#include <QMutexLocker>
-#include <QFileDialog>
-#include <QDir>
-
-class QCheckBox;
-class QPushButton;
-class QTextBrowser;
+#include <QSharedMemory>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -33,11 +25,8 @@ public Q_SLOTS:
     void clearData();
     void shuffleData();
     void sortData();
-    void updateTextBrowser();
-
-private Q_SLOTS:
-    void choosePath();
-    void saveDataToMemoryMappedFile();
+    void saveDataToFile();
+    void updateSharedMemoryData();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -56,14 +45,10 @@ private:
     QPushButton *shuffleButton;
     QPushButton *sortButton;
 
+    QMutex *mutex;
     Ui::MainWindow *ui;
 
-    std::unique_ptr<QMutex> mutex;
-
-    Q_DISABLE_COPY(MainWindow);
-    Q_DISABLE_MOVE(MainWindow);
-
-    void Initilize();
+    QSharedMemory sharedMemory; // Для Memory Mapped File
 };
 
 #endif // MAINWINDOW_H

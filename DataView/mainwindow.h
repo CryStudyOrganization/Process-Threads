@@ -1,3 +1,4 @@
+// mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -6,10 +7,9 @@
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QFile>
-#include <QFileDialog>
-#include <QTimer>
+#include <QIODevice>
 #include <QSharedMemory>
-#include <QFileSystemWatcher>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,25 +28,15 @@ private Q_SLOTS:
     void saveDataToMemoryMappedFile();
     void fileChanged(const QString& path);
 
+private slots:
+    void updateData();
+    
 private:
     QString dataPath;
     Ui::MainWindow *ui;
 
-    QPushButton *selectPathButton;
-    QTextBrowser *textBrowser;
-    QTextBrowser *currPath;
-
-    QMutex *dataFileMutex;
-    QSharedMemory *sharedMemory;
-    QFileSystemWatcher fileWatcher;
-
-    void Initilize();
-    void updateData();
-    bool readDataFromFile(QFile& file, QStringList& dataList);
-    void displayData(const QStringList& dataList);
-
-    Q_DISABLE_COPY(MainWindow);
-    Q_DISABLE_MOVE(MainWindow);
+    QSharedMemory sharedMemory; // Memory Mapped File
+    QMutex mutex; // М'ютекс для синхронізації доступу до даних
 };
 
 #endif // MAINWINDOW_H
