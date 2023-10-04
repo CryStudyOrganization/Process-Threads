@@ -23,11 +23,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-private Q_SLOTS:
-    void choosePath();
-    void saveDataToMemoryMappedFile();
-    void fileChanged(const QString& path);
-
 private slots:
     void updateData();
     

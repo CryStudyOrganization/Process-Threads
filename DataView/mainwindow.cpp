@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QThread>
-
 #include <QFile>
 #include <QSharedMemory>
 #include <QDataStream>
@@ -13,14 +12,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     sharedMemory.setKey("DataMemory");
 
-    try {
-        if (!sharedMemory.attach()) {
-            if (!sharedMemory.create(sizeof(int) * 20)) {
-                throw std::runtime_error("Ошибка при создании Memory Mapped File.");
-            }
+    if (!sharedMemory.attach()) {
+        if (!sharedMemory.create(sizeof(int) * 20)) {
+            ui->textBrowser->setPlainText("Ошибка при создании Memory Mapped File.");
         }
-    } catch (const std::exception& ex) {
-        ui->textBrowser->setPlainText(QString("Ошибка: %1").arg(ex.what()));
     }
 
     QTimer *timer = new QTimer(this);
@@ -33,30 +28,17 @@ void MainWindow::updateData()
     QMutexLocker locker(&mutex);
 
     if (sharedMemory.isAttached()) {
-        try {
-            int *data = (int *)sharedMemory.data();
+        int *data = reinterpret_cast<int *>(sharedMemory.data());
 
-            QStringList dataList;
+        QStringList dataList;
+        for (int i = 0; i < 20; ++i) {
+            dataList.append(QString::number(data[i]));
+        }
 
-            for (int i = 0; i < 20; ++i) {
-                dataList.append(QString::number(data[i]));
-            }
-
-<<<<<<< HEAD
-            if (dataList.isEmpty()) {
-                ui->textBrowser->setPlainText("Дані відсутні.");
-            } else {
-                ui->textBrowser->setPlainText(dataList.join(" "));
-            }
-        } catch (const std::exception& ex) {
-            ui->textBrowser->setPlainText(QString("Ошибка: %1").arg(ex.what()));
-=======
         if (dataList.isEmpty()) {
-            ui->textBrowser->setPlainText("Дані відсутні.");
+            ui->textBrowser->setPlainText("Данные отсутствуют.");
         } else {
             ui->textBrowser->setPlainText(dataList.join(" "));
-
->>>>>>> 7e7827db43ba98fa92285c677958650d776a0f6e
         }
     }
 }
