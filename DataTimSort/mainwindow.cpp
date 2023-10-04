@@ -1,10 +1,10 @@
-// mainwindow.cpp
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "timsort.h"
 
 #include <QFile>
 #include <QTextStream>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,21 +26,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(shuffleButton, SIGNAL(clicked()), this, SLOT(shuffleData()));
     connect(sortButton, SIGNAL(clicked()), this, SLOT(sortData()));
 
-    // Ініціалізація м'ютексу
-    mutex = new QMutex(QMutex::Recursive);
+    mutex = new QMutex();
 
-    // Відкриваємо Memory Mapped File (або створюємо новий, якщо він не існує)
     sharedMemory.setKey("DataMemory");
-    if (!sharedMemory.create(sizeof(int) * dataVector.size())) {
+
+    try {
         if (!sharedMemory.attach()) {
-            ui->textBrowser->setPlainText("Помилка при доступі до Memory Mapped File.");
+            if (!sharedMemory.create(sizeof(int) * 20)) {
+                throw std::runtime_error("Failed to create or attach to Memory Mapped File");
+            }
         }
-    }G 7UJM
-    // Завантаження даних з Memory Mapped File
-    updateSharedMemoryData();
+        updateSharedMemoryData();
+
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Error", e.what());
+    }
 }
 
-// Оголосіть цей метод у визначенні класу MainWindow
 void MainWindow::updateSharedMemoryData() {
     if (sharedMemory.isAttached()) {
         int *data = static_cast<int *>(sharedMemory.data());
@@ -51,27 +53,31 @@ void MainWindow::updateSharedMemoryData() {
 }
 
 void MainWindow::createData() {
-    QMutexLocker locker(mutex); // Захоплюємо м'ютекс перед зміною даних
+    QMutexLocker locker(mutex);
     dataVector.clear();
     for (int i = 0; i < 20; ++i) {
         int number = QRandomGenerator::global()->bounded(91) + 10;
         dataVector.append(number);
     }
 
-    updateSharedMemoryData();
+    try {
+        updateSharedMemoryData();
 
-    if (isFile->isChecked()) {
-        saveDataToFile();
+        if (isFile->isChecked()) {
+            saveDataToFile();
+        }
+
+        updateTextBrowser();
+    } catch (...) {
+        ui->textBrowser->setPlainText("Failed with work to Memory Mapped File: ");
     }
-
-    updateTextBrowser();
 }
 
 void MainWindow::deleteData() {
     QMutexLocker locker(mutex);
     dataVector.clear();
 
-    updateSharedMemoryData(); // Оновлюємо дані в Memory Mapped File
+    updateSharedMemoryData();
 
     if (isFile->isChecked()) {
         saveDataToFile();
@@ -84,7 +90,7 @@ void MainWindow::clearData() {
     QMutexLocker locker(mutex);
     dataVector.clear();
 
-    updateSharedMemoryData(); // Оновлюємо дані в Memory Mapped File
+    updateSharedMemoryData();
 
     if (isFile->isChecked()) {
         saveDataToFile();
@@ -96,7 +102,7 @@ void MainWindow::shuffleData() {
     QMutexLocker locker(mutex);
     std::random_shuffle(dataVector.begin(), dataVector.end());
 
-    updateSharedMemoryData(); // Оновлюємо дані в Memory Mapped File
+    updateSharedMemoryData();
 
     if (isFile->isChecked()) {
         saveDataToFile();
@@ -108,7 +114,7 @@ void MainWindow::sortData() {
     QMutexLocker locker(mutex);
     timsort(dataVector.begin(), dataVector.end());
 
-    updateSharedMemoryData(); // Оновлюємо дані в Memory Mapped File
+    updateSharedMemoryData();
 
     if (isFile->isChecked()) {
         saveDataToFile();
@@ -145,6 +151,6 @@ void MainWindow::saveDataToFile() {
 MainWindow::~MainWindow()
 {
     delete ui;
-    sharedMemory.detach(); // Відключаємо Memory Mapped File
-    delete mutex; // Вивільняємо ресурси м'ютексу
+    sharedMemory.detach();
+    delete mutex;
 }

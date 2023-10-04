@@ -5,6 +5,9 @@
 #include <vector>
 
 template <typename RandomAccessIterator>
+using TrairsValueType = typename std::iterator_traits<RandomAccessIterator>::value_type;
+
+template <typename RandomAccessIterator>
 void insertionSort(RandomAccessIterator begin, RandomAccessIterator end) {
     for (auto i = begin; i != end; ++i) {
         for (auto j = i; j != begin && *j < *(j - 1); --j) {
@@ -15,8 +18,8 @@ void insertionSort(RandomAccessIterator begin, RandomAccessIterator end) {
 
 template <typename RandomAccessIterator>
 void merge(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end) {
-    std::vector<typename std::iterator_traits<RandomAccessIterator>::value_type> left(begin, middle);
-    std::vector<typename std::iterator_traits<RandomAccessIterator>::value_type> right(middle, end);
+    std::vector<TrairsValueType<RandomAccessIterator>> left(begin, middle);
+    std::vector<TrairsValueType<RandomAccessIterator>> right(middle, end);
 
     auto leftIt = left.begin();
     auto rightIt = right.begin();
@@ -39,7 +42,7 @@ void merge(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccess
 
 template <typename RandomAccessIterator>
 void timsort(RandomAccessIterator begin, RandomAccessIterator end) {
-    const int minRun = 32; // Минимальный размер подмассива для сортировки вставками
+    const int minRun = 32;
 
     auto size = std::distance(begin, end);
 

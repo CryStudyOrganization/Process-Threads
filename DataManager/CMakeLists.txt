@@ -15,8 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS Gui)
 
 add_executable(DataManager
   main.cpp
-  datafilemanager.h
-  datafilemanager.cpp
 )
 target_link_libraries(DataManager Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(DataManager Qt${QT_VERSION_MAJOR}::Gui)

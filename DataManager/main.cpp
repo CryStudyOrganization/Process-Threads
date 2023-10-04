@@ -1,67 +1,69 @@
 #include <QCoreApplication>
+#include <QMutex>
+#include <QTimer>
+#include <QSharedMemory>
 #include <QDebug>
-#include <QRandomGenerator>
-#include <QCoreApplication>
+#include <QThread>
+#include <algorithm>
 
-#include "datafilemanager.h"
+const int DataSize = 20;
+const int DelayMilliseconds = 500;
 
-QString formatData(const QVector<int>& data) {
-    QString result{};
-
-    for (int i = 0; i < data.size(); ++i) {
-        result += QString::number(data[i]) + " ";
-    }
-
-    return result.trimmed();
+// Функция обратной сортировки
+bool compareIntsReverse(const qint32& a, const qint32& b) {
+    return a > b;
 }
 
-QVector<int> FillBeforeRead(){
-    QVector<int> data{};
-    for (int i = 0; i < 20; ++i) {
-        int number = QRandomGenerator::global()->bounded(91) + 10;
-        data.append(number);
+int main(int argc, char *argv[]) {
+    QCoreApplication a(argc, argv);
+
+    QSharedMemory sharedMemory;
+    sharedMemory.setKey("DataMemory");
+
+    if (!sharedMemory.attach()) {
+        qCritical() << "Shared memory does not exist. Run the data generation program first.";
+        return 1;
     }
 
-    return data;
-}
+    qint32* data = reinterpret_cast<qint32*>(sharedMemory.data());
 
-class MyApplication : public QCoreApplication {
-public:
-    MyApplication(int &argc, char **argv) : QCoreApplication(argc, argv) {}
+    QMutex mutex;
 
+    QTimer timer;
 
-    void runProgram() {
-        const QString fileName = "../datafiles/data.dat";
-        DataFileManager fileManager(fileName);
+    QObject::connect(&timer, &QTimer::timeout, [&](){
+        QString res = "Iteration:";
+        {
+            QMutexLocker locker(&mutex);
 
-        if (!fileManager.openFile(QIODevice::WriteOnly)) {
-            qDebug() << "Ошибка открытия файла!";
-            return;
+            bool swapped = false;
+
+            for (int i = 1; i < DataSize; ++i) {
+                if (data[i - 1] > data[i]) {
+                    qint32 temp = data[i - 1];
+                    data[i - 1] = data[i];
+                    data[i] = temp;
+                    swapped = true;
+                }
+            }
+
+            if (!swapped) {
+                timer.stop();
+            }
+
+            for (int i = 0; i < DataSize; ++i) {
+                if (i != 0) {
+                    res.append(" ");
+                }
+                res.append(QString::number(data[i]));
+            }
         }
 
-        qDebug() << "Файл создан и заполнен случайными числами.";
+        QThread::msleep(DelayMilliseconds);
 
-        QVector<int> data = FillBeforeRead();
-        fileManager.writeDataToFile(data);
-
-        qDebug() << "Файл содержит следующие данные до сортировки:";
-        qDebug() << formatData(data);
-
-        std::sort(data.begin(), data.end());
-        fileManager.writeDataToFile(data);
-
-        qDebug() << "Файл содержит следующие данные после сортировки:";
-        qDebug() << formatData(data);
-
-        qDebug() << "Работа завершена.";
-    }
-};
-
-int main(int argc, char *argv[])
-{
-    MyApplication a(argc, argv);
-
-    a.runProgram(); // Запускаем программу в начале
+        qDebug() << res;
+    });
+    timer.start();
 
     return a.exec();
 }

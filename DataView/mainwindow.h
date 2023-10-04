@@ -27,8 +27,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    QSharedMemory sharedMemory; // Memory Mapped File
-    QMutex mutex; // М'ютекс для синхронізації доступу до даних
+    QSharedMemory sharedMemory;
+    QMutex mutex;
 };
 
 #endif // MAINWINDOW_H

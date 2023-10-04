@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,10 +10,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     sharedMemory.setKey("DataMemory");
 
-    if (!sharedMemory.create(sizeof(int) * 20)) {
+    try {
         if (!sharedMemory.attach()) {
-            ui->textBrowser->setPlainText("Помилка при доступі до Memory Mapped File.");
+            if (!sharedMemory.create(sizeof(int) * 20)) {
+                throw std::runtime_error("Ошибка при создании Memory Mapped File.");
+            }
         }
+    } catch (const std::exception& ex) {
+        ui->textBrowser->setPlainText(QString("Ошибка: %1").arg(ex.what()));
     }
 
     QTimer *timer = new QTimer(this);
@@ -25,18 +30,22 @@ void MainWindow::updateData()
     QMutexLocker locker(&mutex);
 
     if (sharedMemory.isAttached()) {
-        int *data = (int *)sharedMemory.data();
+        try {
+            int *data = (int *)sharedMemory.data();
 
-        QStringList dataList;
+            QStringList dataList;
 
-        for (int i = 0; i < 20; ++i) {
-            dataList.append(QString::number(data[i]));
-        }
+            for (int i = 0; i < 20; ++i) {
+                dataList.append(QString::number(data[i]));
+            }
 
-        if (dataList.isEmpty()) {
-            ui->textBrowser->setPlainText("Дані відсутні.");
-        } else {
-            ui->textBrowser->setPlainText(dataList.join(" "));
+            if (dataList.isEmpty()) {
+                ui->textBrowser->setPlainText("Дані відсутні.");
+            } else {
+                ui->textBrowser->setPlainText(dataList.join(" "));
+            }
+        } catch (const std::exception& ex) {
+            ui->textBrowser->setPlainText(QString("Ошибка: %1").arg(ex.what()));
         }
     }
 }
