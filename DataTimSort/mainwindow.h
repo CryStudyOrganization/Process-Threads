@@ -10,6 +10,7 @@
 #include <QRandomGenerator>
 #include <QMutex>
 #include <QSharedMemory>
+#include <QTextBrowser>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,7 +20,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public slots:
+public Q_SLOTS:
     void createData();
     void deleteData();
     void clearData();
@@ -27,18 +28,18 @@ public slots:
     void sortData();
     void saveDataToFile();
     void updateSharedMemoryData();
+    void Initilize();
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void updateTextBrowser();
-
 private:
-    const QString dataPath = "../datafiles/data.dat";
+    QString dataPath;
     QVector<int> dataVector;
 
-    QCheckBox *isFile;
+    QPushButton *selectPathButton;
+    QTextBrowser *currPath;
 
     QPushButton *createButton;
     QPushButton *deleteButton;
@@ -51,4 +52,5 @@ private:
 
     QSharedMemory sharedMemory; // Для Memory Mapped File
 };
+
 #endif // MAINWINDOW_H

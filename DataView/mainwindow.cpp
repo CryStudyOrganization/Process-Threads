@@ -2,9 +2,12 @@
 #include "./ui_mainwindow.h"
 #include <QThread>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+#include <QFile>
+#include <QSharedMemory>
+#include <QDataStream>
+#include <QTimer>
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -39,6 +42,7 @@ void MainWindow::updateData()
                 dataList.append(QString::number(data[i]));
             }
 
+<<<<<<< HEAD
             if (dataList.isEmpty()) {
                 ui->textBrowser->setPlainText("Дані відсутні.");
             } else {
@@ -46,6 +50,13 @@ void MainWindow::updateData()
             }
         } catch (const std::exception& ex) {
             ui->textBrowser->setPlainText(QString("Ошибка: %1").arg(ex.what()));
+=======
+        if (dataList.isEmpty()) {
+            ui->textBrowser->setPlainText("Дані відсутні.");
+        } else {
+            ui->textBrowser->setPlainText(dataList.join(" "));
+
+>>>>>>> 7e7827db43ba98fa92285c677958650d776a0f6e
         }
     }
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
-    <height>289</height>
+    <width>908</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
+      <x>50</x>
+      <y>80</y>
       <width>821</width>
       <height>210</height>
      </rect>
@@ -29,13 +29,6 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QCheckBox" name="_isFile">
-         <property name="text">
-          <string>Файл</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QPushButton" name="_create">
          <property name="text">
@@ -75,14 +68,37 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="selectedPathButton">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>30</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Выбрать файл</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="currPath">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>30</y>
+      <width>691</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>846</width>
-     <height>25</height>
+     <width>908</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTimSort">
