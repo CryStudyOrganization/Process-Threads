@@ -31,7 +31,7 @@ private:
     Ui::MainWindow *ui;
 
     QSharedMemory sharedMemory;
-    QMutex mutex;
+    QMutex *mutex;
 };
 
 #endif // MAINWINDOW_H

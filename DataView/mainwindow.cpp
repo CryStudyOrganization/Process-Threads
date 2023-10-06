@@ -6,7 +6,7 @@
 #include <QDataStream>
 #include <QTimer>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), mutex(new QMutex)
 {
     ui->setupUi(this);
 
@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::updateData()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(mutex);
 
     if (sharedMemory.isAttached()) {
         int *data = reinterpret_cast<int *>(sharedMemory.data());
@@ -45,6 +45,7 @@ void MainWindow::updateData()
 
 MainWindow::~MainWindow()
 {
+    delete mutex;
     sharedMemory.detach();
     delete ui;
 }

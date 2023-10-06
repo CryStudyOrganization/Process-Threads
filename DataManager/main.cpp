@@ -27,16 +27,16 @@ int main(int argc, char *argv[]) {
 
     qint32* data = reinterpret_cast<qint32*>(sharedMemory.data());
 
-    QMutex mutex;
+    QMutex* mutex = new QMutex();
 
     QTimer timer;
 
     QObject::connect(&timer, &QTimer::timeout, [&](){
         QString res = "Iteration:";
+        bool swapped = false;
         {
-            QMutexLocker locker(&mutex);
-
-            bool swapped = false;
+            QMutexLocker locker(mutex);
+            qDebug() << "Mutex locked";
 
             for (int i = 1; i < DataSize; ++i) {
                 if (data[i - 1] > data[i]) {
@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
                 res.append(QString::number(data[i]));
             }
         }
+        qDebug() << "Mutex unlocked";
 
         QThread::msleep(DelayMilliseconds);
 
@@ -65,5 +66,7 @@ int main(int argc, char *argv[]) {
     });
     timer.start();
 
+    sharedMemory.detach();
+    delete mutex;
     return a.exec();
 }

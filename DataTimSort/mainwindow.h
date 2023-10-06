@@ -3,14 +3,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPushButton>
 #include <QVector>
-#include <QString>
-#include <QCheckBox>
-#include <QRandomGenerator>
 #include <QMutex>
 #include <QSharedMemory>
 #include <QTextBrowser>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,27 +16,25 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
-public Q_SLOTS:
+public slots:
+    void Initialize();
+
     void createData();
     void deleteData();
     void clearData();
     void shuffleData();
     void sortData();
-    void saveDataToFile();
-    void updateSharedMemoryData();
-    void Initilize();
 
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    void updateSharedMemoryData();
 
 private:
-    QString dataPath;
-    QVector<int> dataVector;
+    Ui::MainWindow *ui;
 
-    QPushButton *selectPathButton;
-    QTextBrowser *currPath;
+    QVector<int> dataVector;
 
     QPushButton *createButton;
     QPushButton *deleteButton;
@@ -48,9 +43,7 @@ private:
     QPushButton *sortButton;
 
     QMutex *mutex;
-    Ui::MainWindow *ui;
-
-    QSharedMemory sharedMemory; // Для Memory Mapped File
+    QSharedMemory sharedMemory;
 };
 
 #endif // MAINWINDOW_H

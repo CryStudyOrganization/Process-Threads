@@ -5,42 +5,25 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
-
 #include <QSharedMemory>
 #include <QRandomGenerator>
 #include <QDebug>
 #include <QMutex>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), mutex(new QMutex)
 {
     ui->setupUi(this);
-    Initilize();
+    Initialize();
 }
 
-void MainWindow::Initilize()
+void MainWindow::Initialize()
 {
-    connect(findChild<QPushButton*>("selectedPathButton"), &QPushButton::clicked, this, &MainWindow::choosePath);
-    connect(findChild<QPushButton*>("_create"), &QPushButton::clicked, this, &MainWindow::createData);
-    connect(findChild<QPushButton*>("_delete"), &QPushButton::clicked, this, &MainWindow::deleteData);
-    connect(findChild<QPushButton*>("_clear"), &QPushButton::clicked, this, &MainWindow::clearData);
-    connect(findChild<QPushButton*>("_shuffle"), &QPushButton::clicked, this, &MainWindow::shuffleData);
-    connect(findChild<QPushButton*>("sort"), &QPushButton::clicked, this, &MainWindow::sortData);
-
-    // Initialize the mutex using std::unique_ptr
-    mutex = std::make_unique<QMutex>();
-}
-
-void MainWindow::choosePath()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл", QDir::homePath());
-  
-    connect(createButton, SIGNAL(clicked()), this, SLOT(createData()));
-    connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteData()));
-    connect(clearButton, SIGNAL(clicked()), this, SLOT(clearData()));
-    connect(shuffleButton, SIGNAL(clicked()), this, SLOT(shuffleData()));
-    connect(sortButton, SIGNAL(clicked()), this, SLOT(sortData()));
-
-    mutex = new QMutex();
+    connect(ui->_create, &QPushButton::clicked, this, &MainWindow::createData);
+    connect(ui->_delete, &QPushButton::clicked, this, &MainWindow::deleteData);
+    connect(ui->_clear, &QPushButton::clicked, this, &MainWindow::clearData);
+    connect(ui->_shuffle, &QPushButton::clicked, this, &MainWindow::shuffleData);
+    connect(ui->sort, &QPushButton::clicked, this, &MainWindow::sortData);
 
     sharedMemory.setKey("DataMemory");
 
@@ -57,128 +40,69 @@ void MainWindow::choosePath()
     }
 }
 
-void MainWindow::updateSharedMemoryData() {
-    if (sharedMemory.isAttached()) {
+void MainWindow::updateSharedMemoryData()
+{
+    if (sharedMemory.isAttached())
+    {
         int *data = static_cast<int *>(sharedMemory.data());
-        for (int i = 0; i < dataVector.size(); ++i) {
+        for (int i = 0; i < dataVector.size(); ++i)
+        {
             data[i] = dataVector[i];
         }
+
+        QStringList dataStringList;
+        for (int i = 0; i < dataVector.size(); ++i)
+        {
+            dataStringList.append(QString::number(dataVector[i]));
+        }
+
+        ui->textBrowser->setPlainText(dataStringList.join(" "));
     }
 }
 
-void MainWindow::createData() {
+void MainWindow::createData()
+{
     QMutexLocker locker(mutex);
     dataVector.clear();
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 20; ++i)
+    {
         int number = QRandomGenerator::global()->bounded(91) + 10;
         dataVector.append(number);
     }
 
-    try {
-        updateSharedMemoryData();
-
-        if (isFile->isChecked()) {
-            saveDataToFile();
-        }
-
-        updateTextBrowser();
-    } catch (...) {
-        ui->textBrowser->setPlainText("Failed with work to Memory Mapped File: ");
-    }
-}
-
-void MainWindow::deleteData() {
-    QMutexLocker locker(mutex);
-    dataVector.clear();
-
     updateSharedMemoryData();
-
-    if (isFile->isChecked()) {
-        saveDataToFile();
-    }
-
-    updateTextBrowser();
 }
 
-void MainWindow::clearData() {
-    QMutexLocker locker(mutex);
-    dataVector.clear();
-
-    updateSharedMemoryData();
-
-    if (isFile->isChecked()) {
-        saveDataToFile();
-    }
-    updateTextBrowser();
-}
-
-void MainWindow::shuffleData() {
-    QMutexLocker locker(mutex);
-    std::random_shuffle(dataVector.begin(), dataVector.end());
-
-    updateSharedMemoryData();
-
-    if (isFile->isChecked()) {
-        saveDataToFile();
-    }
-    updateTextBrowser();
-}
-
-void MainWindow::sortData() {
-    QMutexLocker locker(mutex);
-    timsort(dataVector.begin(), dataVector.end());
-
-    updateSharedMemoryData();
-
-    if (isFile->isChecked()) {
-        saveDataToFile();
-    }
-  
-    updateTextBrowser();
-}
-
-void MainWindow::updateTextBrowser()
+void MainWindow::deleteData()
 {
-    QString dataString;
-    for (int i = 0; i < dataVector.size(); ++i) {
-        dataString += QString::number(dataVector[i]) + " ";
-    }
+    QMutexLocker locker(mutex);
 
-    ui->textBrowser->setPlainText(dataString);
-
-    saveDataToMemoryMappedFile();
+    dataVector.clear();
+    updateSharedMemoryData();
 }
 
-void MainWindow::saveDataToFile() {
-    QFile file(dataPath);
+void MainWindow::clearData()
+{
+    QMutexLocker locker(mutex);
 
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream stream(&file);
+    dataVector.clear();
+    updateSharedMemoryData();
+}
 
-        const char *separator = file.exists() ? " " : "";
+void MainWindow::shuffleData()
+{
+    QMutexLocker locker(mutex);
 
-        for (int i = 0; i < dataVector.size(); ++i) {
-            stream << separator << dataVector[i];
-            separator = " ";
-        }
+    std::random_shuffle(dataVector.begin(), dataVector.end());
+    updateSharedMemoryData();
+}
 
-        file.close();
-    }
+void MainWindow::sortData()
+{
+    QMutexLocker locker(mutex);
 
-    // Get a pointer to the data in the memory-mapped file
-    int *sharedData = static_cast<int*>(sharedMemory.data());
-
-    // Lock the mutex before writing to the file
-    QMutexLocker locker(mutex.get());
-
-    // Copy data from dataVector to the memory-mapped file
-    QByteArray byteArray(reinterpret_cast<char*>(sharedData), dataVector.size() * sizeof(int));
-    QDataStream stream(&byteArray, QIODevice::WriteOnly);
-    for (int i = 0; i < dataVector.size(); ++i) {
-        stream << dataVector[i];
-    }
-
-    // Unlock the mutex after writing
+    timsort(dataVector.begin(), dataVector.end());
+    updateSharedMemoryData();
 }
 
 MainWindow::~MainWindow()
