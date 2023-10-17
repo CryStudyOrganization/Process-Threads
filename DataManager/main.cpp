@@ -4,6 +4,7 @@
 #include <QSharedMemory>
 #include <QDebug>
 #include <QThread>
+#include <QMutexLocker>
 #include <algorithm>
 
 const int DataSize = 20;
@@ -17,8 +18,7 @@ bool compareIntsReverse(const qint32& a, const qint32& b) {
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
-    QSharedMemory sharedMemory;
-    sharedMemory.setKey("DataMemory");
+    QSharedMemory sharedMemory("DataMemory");
 
     if (!sharedMemory.attach()) {
         qCritical() << "Shared memory does not exist. Run the data generation program first.";
@@ -27,46 +27,42 @@ int main(int argc, char *argv[]) {
 
     qint32* data = reinterpret_cast<qint32*>(sharedMemory.data());
 
-    QMutex* mutex = new QMutex();
+    QMutex mutex; // Объект мьютекса для синхронизации доступа к разделяемой памяти
 
     QTimer timer;
 
     QObject::connect(&timer, &QTimer::timeout, [&](){
         QString res = "Iteration:";
         bool swapped = false;
+
         {
-            QMutexLocker locker(mutex);
-            qDebug() << "Mutex locked";
+            QMutexLocker locker(&mutex); // Блокируем мьютекс при доступе к данным
 
             for (int i = 1; i < DataSize; ++i) {
                 if (data[i - 1] > data[i]) {
-                    qint32 temp = data[i - 1];
-                    data[i - 1] = data[i];
-                    data[i] = temp;
+                    std::swap(data[i - 1], data[i]);
                     swapped = true;
                 }
             }
-
-            if (!swapped) {
-                timer.stop();
-            }
-
-            for (int i = 0; i < DataSize; ++i) {
-                if (i != 0) {
-                    res.append(" ");
-                }
-                res.append(QString::number(data[i]));
-            }
         }
-        qDebug() << "Mutex unlocked";
+
+        if (!swapped) {
+            timer.stop();
+        }
+
+        for (int i = 0; i < DataSize; ++i) {
+            if (i != 0) {
+                res.append(" ");
+            }
+            res.append(QString::number(data[i]));
+        }
 
         QThread::msleep(DelayMilliseconds);
 
         qDebug() << res;
     });
+
     timer.start();
 
-    sharedMemory.detach();
-    delete mutex;
     return a.exec();
 }

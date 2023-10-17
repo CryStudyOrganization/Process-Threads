@@ -2,14 +2,6 @@
 #include "./ui_mainwindow.h"
 #include "timsort.h"
 
-#include <QFile>
-#include <QTextStream>
-#include <QMessageBox>
-#include <QSharedMemory>
-#include <QRandomGenerator>
-#include <QDebug>
-#include <QMutex>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), mutex(new QMutex)
 {
@@ -45,6 +37,7 @@ void MainWindow::updateSharedMemoryData()
     if (sharedMemory.isAttached())
     {
         int *data = static_cast<int *>(sharedMemory.data());
+
         for (int i = 0; i < dataVector.size(); ++i)
         {
             data[i] = dataVector[i];
@@ -69,40 +62,35 @@ void MainWindow::createData()
         int number = QRandomGenerator::global()->bounded(91) + 10;
         dataVector.append(number);
     }
-
-    updateSharedMemoryData();
+    updateSharedMemoryData(); // Обновляем общую память после создания данных
 }
 
 void MainWindow::deleteData()
 {
     QMutexLocker locker(mutex);
-
     dataVector.clear();
-    updateSharedMemoryData();
+    updateSharedMemoryData(); // Обновляем общую память после удаления данных
 }
 
 void MainWindow::clearData()
 {
     QMutexLocker locker(mutex);
-
     dataVector.clear();
-    updateSharedMemoryData();
+    updateSharedMemoryData(); // Обновляем общую память после очистки данных
 }
 
 void MainWindow::shuffleData()
 {
     QMutexLocker locker(mutex);
-
     std::random_shuffle(dataVector.begin(), dataVector.end());
-    updateSharedMemoryData();
+    updateSharedMemoryData(); // Обновляем общую память после перемешивания данных
 }
 
 void MainWindow::sortData()
 {
     QMutexLocker locker(mutex);
-
     timsort(dataVector.begin(), dataVector.end());
-    updateSharedMemoryData();
+    updateSharedMemoryData(); // Обновляем общую память после сортировки данных
 }
 
 MainWindow::~MainWindow()

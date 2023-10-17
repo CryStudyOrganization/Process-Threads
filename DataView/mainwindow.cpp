@@ -30,15 +30,15 @@ void MainWindow::updateData()
     if (sharedMemory.isAttached()) {
         int *data = reinterpret_cast<int *>(sharedMemory.data());
 
-        QStringList dataList;
+        QString dataString;
         for (int i = 0; i < 20; ++i) {
-            dataList.append(QString::number(data[i]));
+            dataString += QString("*").repeated(data[i]) + " ";
         }
 
-        if (dataList.isEmpty()) {
+        if (dataString.isEmpty()) {
             ui->textBrowser->setPlainText("Данные отсутствуют.");
         } else {
-            ui->textBrowser->setPlainText(dataList.join(" "));
+            ui->textBrowser->setPlainText(dataString);
         }
     }
 }

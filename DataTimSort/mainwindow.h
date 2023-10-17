@@ -4,10 +4,15 @@
 
 #include <QMainWindow>
 #include <QVector>
+#include <QFile>
 #include <QMutex>
 #include <QSharedMemory>
 #include <QTextBrowser>
 #include <QPushButton>
+#include <QTextStream>
+#include <QMessageBox>
+#include <QRandomGenerator>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
