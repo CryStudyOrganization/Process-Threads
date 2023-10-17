@@ -1,5 +1,4 @@
 ## Лабораторна робота №1: "Процеси та потоки"
-# [ЗВІТ ЗНАХОДИТЬСЯ ТУТ (жми)]([https://github.com/CryStudyOrganization/Process-Threads](https://github.com/CryStudyOrganization/Process-Threads/blob/dev/Lab1.pdf))
 ### Тема:
 "Процеси та потоки. Взаємодія між процесами. Розподіл даних між процесами. Робота з файлами, що відображуються в пам'ять."
 
